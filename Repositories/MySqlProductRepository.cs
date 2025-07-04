@@ -42,11 +42,93 @@ public class MySqlProductRepository: IProductRepository
 
     public List<Product> GetAllProducts()
     {
-        throw new NotImplementedException();
+        var products = new List<Product>();
+        using (var connection = new MySqlConnection(_connectionString))
+        {
+            connection.Open();
+            string selectSql = "SELECT * FROM Products";
+            //1.box 
+            //2.dish
+            //3.phone
+            using (MySqlCommand cmd = new MySqlCommand(selectSql, connection))
+            {
+                using (MySqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        //origin way
+                        //Product product = new Product(reader.GetInt32(column: "id"),
+                                //reader.GetString(column: "name"),
+                                //reader.GetDecimal(column: "price"),
+                                //reader.GetInt32(column: "quantity"));
+                        
+                            //product.Status = (Product .ProductStatus)reader.GetInt32(column:"status");
+                        //products.Add(product);
+                        
+                        //obj initializer
+                        products.Add(new Product(reader.GetInt32("id"),
+                        name:reader.GetString("name"),
+                        price:reader.GetDecimal("price"),
+                        quantity:reader.GetInt32(column:"quantity"))
+                        {
+                           Status = (Product .ProductStatus)reader.GetInt32(column:"status")
+                        });
+                    }
+                    }
+                }
+            }
+
+        return products;
     }
 
     public Product GetProductById(int id)
     {
-        throw new NotImplementedException();
+        Product product = null;
+
+        using (var connection = new MySqlConnection(_connectionString))
+        {
+            connection.Open();
+            string selectSql = "SELECT * FROM Products WHERE id = @id";
+            using (MySqlCommand cmd = new MySqlCommand(selectSql, connection))
+            {
+                //防止sql injection...
+                cmd.Parameters.AddWithValue("@id", id);
+                using (MySqlDataReader reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        product = new Product(reader.GetInt32("id"),
+                        name:reader.GetString("name"),
+                        price:reader.GetDecimal("price"),
+                        quantity:reader.GetInt32(column:"quantity"))
+                        {
+                        Status = (Product .ProductStatus)reader.GetInt32(column:"status")    
+                        };
+                    }
+                    }
+                }
+            }
+        return product;
     }
-}
+    public void AddProduct(string? name, decimal price, int quantity)
+    {
+        using (var connection = new MySqlConnection(_connectionString))
+        {
+            connection.Open();
+            string insertSql = "INSERT INTO  products(name, price, quantity,status) VALUES (@name, @price, @quantity,@status) ";
+            using (MySqlCommand cmd = new MySqlCommand(insertSql, connection))
+            {
+                //防止sql injection...
+                cmd.Parameters.AddWithValue("@name", name);
+                cmd.Parameters.AddWithValue("@price", price);
+                cmd.Parameters.AddWithValue("@quantity", quantity);
+                //todo refactor
+                cmd.Parameters.AddWithValue("@status", 1);
+                cmd.ExecuteNonQuery();
+                    }
+                }
+        
+            }
+        }
+
+

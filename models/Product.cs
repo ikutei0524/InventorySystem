@@ -7,9 +7,9 @@ public class Product
 {
     public enum ProductStatus
     {
-        InStock,//有庫存
-        LouwStock,//庫存偏低
-        OutOfStock//沒有庫存
+        InStock,//有庫存-0
+        LouwStock,//庫存偏低-1
+        OutOfStock//沒有庫存-2
     }
 
     public int Id { get; set; }

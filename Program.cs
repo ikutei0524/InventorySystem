@@ -6,78 +6,142 @@ using InventorySystem.models;
 using InventorySystem.Repositories;
 
 
-Product testProduct = new Product(1, "testProduct",100.0m,20);
-testProduct.Quantity = 15;
-testProduct.UpdateStatus();
-Console.WriteLine(testProduct.ToString());
-
-
-List<Animal> animals = new List<Animal>();
-animals.Add(new Cat("JOJO"));
-animals.Add(new Dog("dog"));
-//animals.Add(new Animal("bird"));
-foreach (Animal animal in animals)
-{
-    animal.MakeSound();
-}
-
-
-
-
-
-
-
-
-void ConsoleReadLine()
-{
-    Console.Write("請輸入你的名字");
-    string userName = Console.ReadLine();
-    Console.WriteLine($"哈囉,{
-        userName}!");
-    Console.Write("請輸入您的年齡");
-    string inputAge = Console.ReadLine();
-    if (int.TryParse(inputAge, out int age))
-    {
-        Console.WriteLine($"你的年齡為,{age}!");
-    }
-    else
-    {
-        Console.WriteLine("年齡輸入錯誤");
-    }
-}
-
-void ForLoop()
-{
-    List<int> numbers = new List<int>() { 1, 2, 3, 4,5,};
-    foreach (int number in numbers)
-    {
-        if (number == 4)
-        {
-            continue;
-        }
-        else if (number != 4)
-        {
-            Console.WriteLine("1,2,3,5,");
-        }
-    }
-}
-
-
-
-
-
-
-
-
-
-
-
-
 const string MYSQL_CONNETION_STRING = "Server=localhost;Port=3306;Database=inventory_db;uid=root;pwd=John0524@;";
 
 MySqlProductRepository productRepository = new MySqlProductRepository(MYSQL_CONNETION_STRING);
 
+RunMenu();
 
-    
+void RunMenu()
+{
+    while (true)
+    {
+        DisplayMenu();
+        string input = Console.ReadLine();
+        switch (input) 
+        {
+            case "1": GetAllProducts();
+                break;
+            case "2": SearchProduct();
+                break;
+            case "3": AddProduct();
+                break;
+            case "0": 
+                Console.WriteLine("再見");
+                return;
+        }
+    }
+}
 
-    
+void DisplayMenu()
+{
+    Console.WriteLine("Welcome to the inventory system!");
+    Console.WriteLine("What would you like to do?");
+    Console.WriteLine("1. 查看所有產品");
+    Console.WriteLine("2. 查詢產品");
+    Console.WriteLine("3. 新增產品");
+    Console.WriteLine("0. 離開");
+}
+
+void GetAllProducts()
+{
+    Console.WriteLine("\n--- 所有產品列表 ---");
+    var products = productRepository.GetAllProducts();
+    if (products.Any())
+    {
+        Console.WriteLine("-----------------------------------------------");
+        Console.WriteLine("ID | Name | Price | Quantity | Status");
+        Console.WriteLine("-----------------------------------------------");
+        foreach (var product in products)
+        {
+            Console.WriteLine(product);
+        }
+        Console.WriteLine("-----------------------------------------------");
+    }
+}
+
+void SearchProduct()
+{
+    Console.WriteLine("輸入欲查詢的產品編號");
+    int input = ReadIntLine(1);
+    var product = productRepository.GetProductById(input);
+    // string input = Console.ReadLine();
+    // var product = productRepository.GetProductById(ReadInt(input));
+    if (product != null)
+    {
+        Console.WriteLine("-----------------------------------------------");
+        Console.WriteLine("ID | Name | Price | Quantity | Status");
+        Console.WriteLine("-----------------------------------------------");
+        Console.WriteLine(product);
+        Console.WriteLine("-----------------------------------------------");
+    }
+}
+
+void AddProduct()
+{
+    Console.WriteLine("輸入產品名稱：");
+    string name = Console.ReadLine();
+    Console.WriteLine("輸入產品價格：");
+    decimal price = ReadDecimalLine();
+    Console.WriteLine("輸入產品數量：");
+    int quantity = ReadIntLine();
+    productRepository.AddProduct(name, price, quantity);
+}
+
+int ReadInt(string input)
+{
+    try
+    {
+        return Convert.ToInt32(input);
+    }
+    catch (FormatException e)
+    {
+        Console.WriteLine("請輸入有效數字。");
+        return 0;
+    }
+}
+
+int ReadIntLine(int defaultValue = 0)
+{
+    while (true)
+    {
+        
+        String input = Console.ReadLine();
+        if (string.IsNullOrWhiteSpace(input) && defaultValue != 0)
+        {
+            return defaultValue;
+        }
+        //string parsing to int 
+        if (int.TryParse(input,out int value))
+        {
+            return value;
+        }
+        else
+        {
+            Console.WriteLine("請輸入有效數字。");
+        }
+    }
+}
+
+decimal ReadDecimalLine(decimal defaultValue = 0.0m)
+{
+    while (true)
+    {
+        
+        String input = Console.ReadLine();
+        if (string.IsNullOrWhiteSpace(input) && defaultValue != 0.0m)
+        {
+            return defaultValue;
+        }
+        //string parsing to int 
+        if (decimal.TryParse(input,out decimal value))
+        {
+            return value;
+        }
+        else
+        {
+            Console.WriteLine("請輸入有效數字。");
+        }
+    }
+}
+
