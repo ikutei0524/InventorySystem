@@ -18,6 +18,9 @@ public class Product
     public int Quantity { get; set; }
     public ProductStatus Status { get; set; }
 
+    public Product()
+    {
+    }
     public Product(int id , string name, decimal price, int quantity)
     {
       Id = id;

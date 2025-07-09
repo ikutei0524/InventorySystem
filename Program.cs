@@ -4,11 +4,32 @@
 using System.ComponentModel;
 using InventorySystem.models;
 using InventorySystem.Repositories;
+using InventorySystem.Service;
+using InventorySystem.Utils;
 
 
 const string MYSQL_CONNETION_STRING = "Server=localhost;Port=3306;Database=inventory_db;uid=root;pwd=John0524@;";
 
-MySqlProductRepository productRepository = new MySqlProductRepository(MYSQL_CONNETION_STRING);
+//MySqlProductRepository mySqlProductRepository = new MySqlProductRepository(MYSQL_CONNETION_STRING);
+MySqlProductRepository productRepo = new MySqlProductRepository(MYSQL_CONNETION_STRING);
+InventoryService inventoryService = new InventoryService(productRepo);
+
+//通知功能相關
+//使用EmailNotifier
+EmailNotifier emailNotifier = new EmailNotifier();
+NotificationService emailService = new NotificationService(emailNotifier);
+//使用SmsNotifier
+SmsNotifier smsNotifier = new SmsNotifier();
+NotificationService smsService = new NotificationService(smsNotifier);
+
+//InventoryService inventoryService1 = new InventoryService(productRepository);
+//小明注入 打掃阿姨1
+//InventoryService inventoryService = new InventoryService(mongoDbProductRepository);
+//小明注入 打掃阿姨2
+
+
+
+
 
 RunMenu();
 
@@ -20,11 +41,16 @@ void RunMenu()
         string input = Console.ReadLine();
         switch (input) 
         {
-            case "1": GetAllProducts();
+            case "1":
+            {
+                GetAllProducts();
+            }
                 break;
             case "2": SearchProduct();
                 break;
             case "3": AddProduct();
+                break;
+            case "4": UpdateProduct();
                 break;
             case "0": 
                 Console.WriteLine("再見");
@@ -40,15 +66,14 @@ void DisplayMenu()
     Console.WriteLine("1. 查看所有產品");
     Console.WriteLine("2. 查詢產品");
     Console.WriteLine("3. 新增產品");
+    Console.WriteLine("4. 更新產品");
     Console.WriteLine("0. 離開");
 }
 
 void GetAllProducts()
 {
     Console.WriteLine("\n--- 所有產品列表 ---");
-    var products = productRepository.GetAllProducts();
-    if (products.Any())
-    {
+    var products = inventoryService.GetAllProducts();
         Console.WriteLine("-----------------------------------------------");
         Console.WriteLine("ID | Name | Price | Quantity | Status");
         Console.WriteLine("-----------------------------------------------");
@@ -57,16 +82,15 @@ void GetAllProducts()
             Console.WriteLine(product);
         }
         Console.WriteLine("-----------------------------------------------");
+        emailService.NotifyUser("user","查詢已完成");
     }
-}
+
 
 void SearchProduct()
 {
     Console.WriteLine("輸入欲查詢的產品編號");
     int input = ReadIntLine(1);
-    var product = productRepository.GetProductById(input);
-    // string input = Console.ReadLine();
-    // var product = productRepository.GetProductById(ReadInt(input));
+    var product = productRepo.GetProductById(input);
     if (product != null)
     {
         Console.WriteLine("-----------------------------------------------");
@@ -85,7 +109,13 @@ void AddProduct()
     decimal price = ReadDecimalLine();
     Console.WriteLine("輸入產品數量：");
     int quantity = ReadIntLine();
-    productRepository.AddProduct(name, price, quantity);
+    productRepo.AddProduct(name, price, quantity);
+    smsService.NotifyUser("Jeffrey","新增產品成功");
+}
+
+void UpdateProduct()
+{
+    throw new NotImplementedException();
 }
 
 int ReadInt(string input)
@@ -145,3 +175,14 @@ decimal ReadDecimalLine(decimal defaultValue = 0.0m)
     }
 }
 
+void OOP()
+{
+    //實體化(new)
+    Cat meow = new Cat("meow");
+    Dog bob = new Dog("bob");
+    //一隻狗bob 一隻貓meow
+
+    Animal milk = new Cat("john");
+    Animal john = new Dog("milk");
+    //兩隻動物 john(dog) milk(cat)
+}

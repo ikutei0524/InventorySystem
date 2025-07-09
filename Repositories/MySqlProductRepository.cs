@@ -129,6 +129,25 @@ public class MySqlProductRepository: IProductRepository
                 }
         
             }
-        }
+    public void CleanKitchen()
+    {
+        throw  new NotImplementedException();
+    }
 
+    public void CleanBathrooms()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Cleanfloor()
+    {
+        
+        throw new NotImplementedException();
+    }
+
+    public void Washcloths()
+    {
+        throw new NotImplementedException();
+    }
+}
 
