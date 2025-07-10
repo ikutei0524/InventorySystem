@@ -16,10 +16,10 @@ InventoryService inventoryService = new InventoryService(productRepo);
 
 //通知功能相關
 //使用EmailNotifier
-EmailNotifier emailNotifier = new EmailNotifier();
+INotifier emailNotifier = new EmailNotifier();
 NotificationService emailService = new NotificationService(emailNotifier);
 //使用SmsNotifier
-SmsNotifier smsNotifier = new SmsNotifier();
+INotifier smsNotifier = new SmsNotifier();
 NotificationService smsService = new NotificationService(smsNotifier);
 
 //InventoryService inventoryService1 = new InventoryService(productRepository);
@@ -90,7 +90,7 @@ void SearchProduct()
 {
     Console.WriteLine("輸入欲查詢的產品編號");
     int input = ReadIntLine(1);
-    var product = productRepo.GetProductById(input);
+    var product = inventoryService.GetProductById(input);
     if (product != null)
     {
         Console.WriteLine("-----------------------------------------------");
@@ -109,13 +109,29 @@ void AddProduct()
     decimal price = ReadDecimalLine();
     Console.WriteLine("輸入產品數量：");
     int quantity = ReadIntLine();
-    productRepo.AddProduct(name, price, quantity);
+    inventoryService.AddProduct(name, price, quantity);
     smsService.NotifyUser("Jeffrey","新增產品成功");
 }
 
 void UpdateProduct()
 {
-    throw new NotImplementedException();
+    Console.WriteLine("請輸入要更新的產品id");
+    int id = ReadIntLine();
+    //找到對應產品
+    var product = inventoryService.GetProductById(id);
+    
+    if (product == null)
+    {
+        return;
+    }
+    Console.WriteLine("輸入產品名稱：");
+    string name = Console.ReadLine();
+    Console.WriteLine("輸入產品價格：");
+    decimal price = ReadDecimalLine();
+    Console.WriteLine("輸入產品數量：");
+    int quantity = ReadIntLine();
+    //service.UpdateProduct
+    inventoryService.UpdateProduct(product, name, price,quantity);
 }
 
 int ReadInt(string input)

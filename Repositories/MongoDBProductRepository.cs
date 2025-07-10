@@ -4,6 +4,10 @@ namespace InventorySystem.Repositories;
 
 public class MongoDBProductRepository : IProductRepository
 {
+    public int GetNextProductId()
+    {
+        throw new NotImplementedException();
+    }
     public MongoDBProductRepository()
     {
     }
@@ -18,7 +22,7 @@ public class MongoDBProductRepository : IProductRepository
         throw new NotImplementedException();
     }
 
-    public void AddProduct(string? name, decimal price, int quantity)
+    public void AddProduct(Product product)
     {
         throw new NotImplementedException();
     }
@@ -39,6 +43,10 @@ public class MongoDBProductRepository : IProductRepository
     }
 
     public void Washcloths()
+    {
+        throw new NotImplementedException();
+    }
+    public void UpdateProduct(Product product)
     {
         throw new NotImplementedException();
     }

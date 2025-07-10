@@ -110,7 +110,26 @@ public class MySqlProductRepository: IProductRepository
             }
         return product;
     }
-    public void AddProduct(string? name, decimal price, int quantity)
+    
+    public void UpdateProduct(Product product)
+    {
+        using (var connection = new MySqlConnection(_connectionString))
+        {
+            connection.Open();
+            string insertSql = "UPDATE products SET name = @name, price=@price, quantity=@quantity,status=@status)";
+            using (MySqlCommand cmd = new MySqlCommand(insertSql, connection))
+            {
+                //防止sql injection...
+                cmd.Parameters.AddWithValue("@name",product.Name);
+                cmd.Parameters.AddWithValue("@price",product.Price);
+                cmd.Parameters.AddWithValue("@quantity",product.Quantity);
+                cmd.Parameters.AddWithValue("@status",product.Status);
+                cmd.ExecuteNonQuery();
+            }
+        }
+    }
+    
+    public void AddProduct(Product product)
     {
         using (var connection = new MySqlConnection(_connectionString))
         {
@@ -119,16 +138,42 @@ public class MySqlProductRepository: IProductRepository
             using (MySqlCommand cmd = new MySqlCommand(insertSql, connection))
             {
                 //防止sql injection...
-                cmd.Parameters.AddWithValue("@name", name);
-                cmd.Parameters.AddWithValue("@price", price);
-                cmd.Parameters.AddWithValue("@quantity", quantity);
-                //todo refactor
-                cmd.Parameters.AddWithValue("@status", 1);
+                cmd.Parameters.AddWithValue("@name",product.Name);
+                cmd.Parameters.AddWithValue("@price",product.Price);
+                cmd.Parameters.AddWithValue("@quantity",product.Quantity);
+                cmd.Parameters.AddWithValue("@status",product.Status);
                 cmd.ExecuteNonQuery();
                     }
                 }
         
             }
+    public int GetNextProductId()
+    {
+        using (var connection = new MySqlConnection(_connectionString))
+        {
+            connection.Open();
+            string selectSql = @"SELECT iFNull(MAX(id),0) FROM products";
+            using (MySqlCommand cmd = new MySqlCommand(selectSql, connection))
+            {
+                var result = cmd.ExecuteScalar();
+                if (result != null)
+                {return Convert.ToInt32(result)+1;
+                }
+                return 0;
+            }
+        }
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     public void CleanKitchen()
     {
         throw  new NotImplementedException();
@@ -149,5 +194,7 @@ public class MySqlProductRepository: IProductRepository
     {
         throw new NotImplementedException();
     }
+
+    
 }
 
