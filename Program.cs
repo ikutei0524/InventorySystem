@@ -9,6 +9,34 @@ using InventorySystem.Utils;
 
 
 const string MYSQL_CONNETION_STRING = "Server=localhost;Port=3306;Database=inventory_db;uid=root;pwd=John0524@;";
+string connectionString = "";
+string configFile = "appsettings.ini";
+
+if (File.Exists(configFile))
+{
+    Console.WriteLine($"Reading {configFile} file");
+    try
+    {
+        foreach (var line in File.ReadLines(configFile))
+        {
+            Console.WriteLine(line);
+        }
+    }
+    catch (Exception e)
+    {
+        Console.WriteLine($"錯誤:讀取配置檔案失敗:{e}");
+        //throw;
+        connectionString = MYSQL_CONNETION_STRING;
+    }
+}
+else
+{
+    Console.WriteLine($"錯誤:配置檔案{configFile}不存在");
+    connectionString = MYSQL_CONNETION_STRING;
+}
+
+
+
 
 //MySqlProductRepository mySqlProductRepository = new MySqlProductRepository(MYSQL_CONNETION_STRING);
 MySqlProductRepository productRepo = new MySqlProductRepository(MYSQL_CONNETION_STRING);
@@ -191,14 +219,14 @@ decimal ReadDecimalLine(decimal defaultValue = 0.0m)
     }
 }
 
-void OOP()
-{
-    //實體化(new)
-    Cat meow = new Cat("meow");
-    Dog bob = new Dog("bob");
-    //一隻狗bob 一隻貓meow
 
-    Animal milk = new Cat("john");
-    Animal john = new Dog("milk");
-    //兩隻動物 john(dog) milk(cat)
+
+void ReadFile(string s)
+{
+    foreach (var line in File.ReadLines(s))
+    {
+        Console.WriteLine(line);
+        
+    }
 }
+
