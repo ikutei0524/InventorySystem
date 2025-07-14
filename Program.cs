@@ -16,10 +16,18 @@ if (File.Exists(configFile))
 {
     Console.WriteLine($"Reading {configFile} file");
     try
-    {
-        foreach (var line in File.ReadLines(configFile))
+    { 
+        Dictionary<string, Dictionary<string, string>> config = ReadFile(configFile);
+        
+        if (config.ContainsKey("Database"))
         {
-            Console.WriteLine(line);
+            var dbConfig = config["Database"];
+            //<Server,localhost>
+            //<Port,3306>
+            //<Database,inventory_db>
+            //<Uid,root>
+            connectionString=$"Server={dbConfig["Server"]};Port={dbConfig["Port"]};Database={dbConfig["Database"]};uid={dbConfig["Uid"]};pwd={dbConfig["Pwd"]};";
+            Console.WriteLine($"讀取資料庫連接字串成功");
         }
     }
     catch (Exception e)
@@ -219,14 +227,35 @@ decimal ReadDecimalLine(decimal defaultValue = 0.0m)
     }
 }
 
-
-
-void ReadFile(string s)
+Dictionary<string, Dictionary<string, string>> ReadFile(string s)
 {
-    foreach (var line in File.ReadLines(s))
+    var config = new Dictionary<string, Dictionary<string, string>>(StringComparer.OrdinalIgnoreCase);
+    string currentSection = "";
+
+    foreach (string line in File.ReadLines(s))
     {
-        Console.WriteLine(line);
-        
+        string trimmedLine = line.Trim();
+        if (trimmedLine.StartsWith("#") || string.IsNullOrWhiteSpace(trimmedLine))
+        {
+            continue; // 跳過註釋和空行
+        }
+
+        if (trimmedLine.StartsWith("[") && trimmedLine.EndsWith("]"))
+        {
+            currentSection = trimmedLine.Substring(1, trimmedLine.Length - 2);
+            config[currentSection] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        }
+        else if (currentSection != "" && trimmedLine.Contains("="))
+        {
+            int equalsIndex = trimmedLine.IndexOf('=');
+            string key = trimmedLine.Substring(0, equalsIndex).Trim();
+            string value = trimmedLine.Substring(equalsIndex + 1).Trim();
+            config[currentSection][key] = value;
+        }
     }
+    return config;
 }
+
+
+
 
