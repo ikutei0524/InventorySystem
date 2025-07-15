@@ -82,11 +82,15 @@ void RunMenu()
                 GetAllProducts();
             }
                 break;
-            case "2": SearchProduct();
+            case "2": SearchProductById();
                 break;
             case "3": AddProduct();
                 break;
             case "4": UpdateProduct();
+                break;
+            case "5": SearchProduct();
+                break;
+            case "6": SearchLowStock();
                 break;
             case "0": 
                 Console.WriteLine("再見");
@@ -100,9 +104,11 @@ void DisplayMenu()
     Console.WriteLine("Welcome to the inventory system!");
     Console.WriteLine("What would you like to do?");
     Console.WriteLine("1. 查看所有產品");
-    Console.WriteLine("2. 查詢產品");
+    Console.WriteLine("2. 查詢產品ID");
     Console.WriteLine("3. 新增產品");
     Console.WriteLine("4. 更新產品");
+    Console.WriteLine("5. 查詢產品");
+    Console.WriteLine("6. 查詢指定產品庫存");
     Console.WriteLine("0. 離開");
 }
 
@@ -122,7 +128,7 @@ void GetAllProducts()
     }
 
 
-void SearchProduct()
+void SearchProductById()
 {
     Console.WriteLine("輸入欲查詢的產品編號");
     int input = ReadIntLine(1);
@@ -136,6 +142,55 @@ void SearchProduct()
         Console.WriteLine("-----------------------------------------------");
     }
 }
+
+void SearchProduct()
+{
+    Console.WriteLine("查詢產品名稱關鍵字");
+    string input = Console.ReadLine();
+    var products = inventoryService.SearchProduct(input);
+    if (products.Any())
+    {
+        Console.WriteLine("------------查詢條件為:({input})------------");
+        Console.WriteLine("-----------------------------------------------");
+        Console.WriteLine("ID | Name | Price | Quantity | Status");
+        Console.WriteLine("-----------------------------------------------");
+        foreach (var product in products)
+        {
+            Console.WriteLine(product);
+        }
+        Console.WriteLine("-----------------------------------------------");
+    }
+}
+
+//查詢低庫存產品
+void SearchLowStock()
+{
+    Console.WriteLine("查詢產品名稱關鍵字");
+    string input = Console.ReadLine();
+    var products = inventoryService.SearchProduct(input);
+    if (products.Any())
+    {
+        Console.WriteLine("-----------查詢條件為:(低庫存)------------");
+        Console.WriteLine("-----------------------------------------------");
+        Console.WriteLine("ID | Name | Price | Quantity | Status");
+        Console.WriteLine("-----------------------------------------------");
+        foreach (var product in products)
+        {
+            Console.WriteLine(product);
+        }
+        Console.WriteLine("-----------------------------------------------");
+    }
+    else
+    {
+        Console.WriteLine("查無符合條件的產品");
+    }
+}
+
+
+
+
+
+
 
 void AddProduct()
 {

@@ -13,23 +13,24 @@ public class InventoryService
     {
         _productRepository = productRepository;
     }
-    
+
     public List<Product> GetAllProducts()
     {
         try
         {
-            
+
             //呼叫介面,而非實作(DI)
             List<Product> products = _productRepository.GetAllProducts();
             if (!products.Any())
             {
                 Console.WriteLine("找不到產品");
             }
+
             //通知功能相關
             //使用EmailNotifier
             EmailNotifier emailNotifier = new EmailNotifier();
             NotificationService emailService = new NotificationService(emailNotifier);
-            emailService.NotifyUser("user","查詢已完成");
+            emailService.NotifyUser("user", "查詢已完成");
             return products;
         }
         catch (Exception e)
@@ -38,6 +39,7 @@ public class InventoryService
             return new List<Product>();
         }
     }
+
     public Product GetProductById(int id)
     {
         try
@@ -54,6 +56,7 @@ public class InventoryService
                 NotificationService emailService = new NotificationService(emailNotifier);
                 emailService.NotifyUser("user", $"已查詢產品：{product.Name}");
             }
+
             return product;
         }
         catch (Exception ex)
@@ -63,11 +66,11 @@ public class InventoryService
         }
     }
 
-    public void AddProduct(string?name,decimal price,int quantity)
+    public void AddProduct(string? name, decimal price, int quantity)
     {
         try
         {
-            if(string.IsNullOrWhiteSpace(name))
+            if (string.IsNullOrWhiteSpace(name))
             {
                 throw new ArgumentException("產品名稱不能為空");
             }
@@ -76,20 +79,22 @@ public class InventoryService
             {
                 throw new ArgumentException("價格必須大於零");
             }
+
             //價格必須大於零
             if (quantity < 0)
             {
                 throw new ArgumentException("數量不能小於零");
             }
+
             //數量不能小於零
-            var product = new Product(_productRepository.GetNextProductId(),name, price, quantity);
+            var product = new Product(_productRepository.GetNextProductId(), name, price, quantity);
             _productRepository.AddProduct(product);
             Console.WriteLine("新增產品成功");
         }
         catch (Exception e)
         {
             Console.WriteLine($"\n 錯誤: {e.Message}");
-            
+
         }
     }
 
@@ -98,7 +103,7 @@ public class InventoryService
         try
         {
             //執行更新
-            if(string.IsNullOrWhiteSpace(name))
+            if (string.IsNullOrWhiteSpace(name))
             {
                 throw new ArgumentException("產品名稱不能為空");
             }
@@ -107,11 +112,13 @@ public class InventoryService
             {
                 throw new ArgumentException("價格必須大於零");
             }
+
             //價格必須大於零
             if (quantity < 0)
             {
                 throw new ArgumentException("數量不能小於零");
             }
+
             //執行更新(覆蓋(賦值)origin product 的屬性)
             product.Name = name;
             product.Price = price;
@@ -128,5 +135,62 @@ public class InventoryService
         }
     }
 
+    public List<Product> SearchProduct(string? input)
+    {
+        try
+        {
+            List<Product> products = _productRepository.GetAllProducts();
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                return products;
+            }
 
+            var results = products
+                .Where(product => product.Name.ToLower().Contains(input.ToLower()))
+                .OrderBy(product => product.Name)
+                .ToList();
+
+            var names = products.Select(p => p.Name).ToList();
+
+            if (!results.Any())
+            {
+                Console.WriteLine("找不到產品");
+            }
+
+            return products;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"讀取產品列表失敗: {e.Message}");
+            return new List<Product>();
+        }
+
+    }
+
+    public List<Product> SearchLowStock()
+    {
+        try
+        {
+            List<Product> products = _productRepository.GetAllProducts();
+
+            var results = products
+                .Where(product => product.Quantity<50)
+                .OrderBy(product => product.Name)
+                .ToList();
+
+            if (!results.Any())
+            {
+                Console.WriteLine("找不到庫存低於50的產品");
+            }
+
+            return results;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"讀取產品列表失敗: {e.Message}");
+            return new List<Product>();
+        }
+    }
 }
+    
+    
