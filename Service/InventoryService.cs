@@ -40,29 +40,21 @@ public class InventoryService
         }
     }
 
-    public Product GetProductById(int id)
+    public OperationResult<Product> GetProductById(int id)
     {
         try
         {
             Product product = _productRepository.GetProductById(id);
             if (product == null)
             {
-                Console.WriteLine("找不到該產品");
-            }
-            else
-            {
-                // 這裡可以加入通知功能
-                EmailNotifier emailNotifier = new EmailNotifier();
-                NotificationService emailService = new NotificationService(emailNotifier);
-                emailService.NotifyUser("user", $"已查詢產品：{product.Name}");
+                return OperationResult<Product>.ErrorResult("查無該產品");
             }
 
-            return product;
+            return OperationResult<Product>.SuccessResult("操作成功", product);
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            Console.WriteLine($"查詢產品失敗: {ex.Message}");
-            return null;
+            return OperationResult<Product>.ErrorResult($"讀取產品列表失敗:{e.Message}");
         }
     }
 
@@ -135,14 +127,14 @@ public class InventoryService
         }
     }
 
-    public List<Product> SearchProduct(string? input)
+    public OperationResult<List<Product>> SearchProduct(string? input)
     {
         try
         {
             List<Product> products = _productRepository.GetAllProducts();
             if (string.IsNullOrWhiteSpace(input))
             {
-                return products;
+                return OperationResult<List<Product>>.ErrorResult("請勿使用空字串");
             }
 
             var results = products
@@ -150,19 +142,16 @@ public class InventoryService
                 .OrderBy(product => product.Name)
                 .ToList();
 
-            var names = products.Select(p => p.Name).ToList();
-
             if (!results.Any())
             {
-                Console.WriteLine("找不到產品");
+                return OperationResult<List<Product>>.ErrorResult("找不到產品");
             }
 
-            return products;
+            return OperationResult<List<Product>>.SuccessResult("操作成功", results);
         }
         catch (Exception e)
         {
-            Console.WriteLine($"讀取產品列表失敗: {e.Message}");
-            return new List<Product>();
+            return OperationResult<List<Product>>.ErrorResult($"讀取產品列表失敗:{e.Message}");
         }
 
     }
@@ -174,7 +163,7 @@ public class InventoryService
             List<Product> products = _productRepository.GetAllProducts();
 
             var results = products
-                .Where(product => product.Quantity<50)
+                .Where(product => product.Quantity < 10)
                 .OrderBy(product => product.Name)
                 .ToList();
 
@@ -191,6 +180,46 @@ public class InventoryService
             return new List<Product>();
         }
     }
+
+    public List<Product> SearchOutOfStockProduct()
+    {
+        try
+        {
+            List<Product> outOfStockProduct = _productRepository.SearchOutOfStockProduct();
+            
+            if (!outOfStockProduct.Any())
+            {
+                Console.WriteLine("找不到已缺貨產品");
+            }
+
+            return outOfStockProduct;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"讀取產品列表失敗: {e.Message}");
+            return new List<Product>();
+        }
+    }
+
+    public void AdjustProductQuantity(Product product, int quantity)
+    {
+        int newQuantity = product.Quantity + quantity;
+        if (newQuantity < 0)
+        {
+            Console.WriteLine($"庫存不足，請再次操作出庫 {quantity}。");
+        } 
+
+        //update product 
+        product.Quantity = newQuantity;
+        product.UpdateStatus();
+        _productRepository.UpdateProduct(product);
+        
+        Console.WriteLine($"成功更新產品: {product.Name} ，當前庫存為 {newQuantity}");
+    }
 }
+
+
+    
+
     
     

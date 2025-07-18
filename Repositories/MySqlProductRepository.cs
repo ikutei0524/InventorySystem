@@ -31,11 +31,11 @@ public class MySqlProductRepository: IProductRepository
                 {
                     cmd.ExecuteNonQuery();
                 }
-                Console.WriteLine("Mysql初始化失敗或成功已存在");
+                Console.WriteLine("[Product]Mysql初始化失敗或成功已存在");
             }
             catch (MySqlException e)
             {
-                Console.WriteLine($"初始化Mysql失敗:{e.Message}");
+                Console.WriteLine($"[Supplier]初始化Mysql失敗:{e.Message}");
             }
         }
     }
@@ -116,10 +116,11 @@ public class MySqlProductRepository: IProductRepository
         using (var connection = new MySqlConnection(_connectionString))
         {
             connection.Open();
-            string insertSql = "UPDATE products SET name = @name, price=@price, quantity=@quantity,status=@status)";
+            string insertSql = "UPDATE products SET name = @name, price=@price,quantity=@quantity,status=@status where id = @id";
             using (MySqlCommand cmd = new MySqlCommand(insertSql, connection))
             {
                 //防止sql injection...
+                cmd.Parameters.AddWithValue("@id", product.Id);
                 cmd.Parameters.AddWithValue("@name",product.Name);
                 cmd.Parameters.AddWithValue("@price",product.Price);
                 cmd.Parameters.AddWithValue("@quantity",product.Quantity);
@@ -164,16 +165,63 @@ public class MySqlProductRepository: IProductRepository
         }
     }
     
+    public List<Product> GetLowProducts()
+    {
+        List<Product> products = new List<Product>();
+        using (var connection = new MySqlConnection(_connectionString))
+        {
+            connection.Open();
+            string selectSql = "SELECT * FROM products WHERE status = 1";
+            using (MySqlCommand cmd = new MySqlCommand(selectSql, connection))
+            {
+                using (MySqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        products.Add(new Product(reader.GetInt32("id"),
+                            reader.GetString("name"),
+                            reader.GetDecimal("price"),
+                            reader.GetInt32("quantity"))
+                        {
+                            Status = (Product.ProductStatus)reader.GetInt32("status")
+                        });
+                    }
+                }
+            }
+        }
+        return products;
+    }
     
+
+    public List<Product> SearchOutOfStockProduct()
+    {
+        List<Product> products = new List<Product>();
+        using (var connection = new MySqlConnection(_connectionString))
+        {
+            connection.Open();
+            string selectSql = "SELECT * FROM products WHERE status = 2";
+            using (MySqlCommand cmd = new MySqlCommand(selectSql, connection))
+            {
+                using (MySqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        products.Add(new Product(reader.GetInt32("id"),
+                            reader.GetString("name"),
+                            reader.GetDecimal("price"),
+                            reader.GetInt32("quantity"))
+                        {
+                            Status = (Product.ProductStatus)reader.GetInt32("status")
+                        });
+                    }
+                }
+            }
+        }
+        return products;
+    }
     
-    
-    
-    
-    
-    
-    
-    
-    
+
+
     public void CleanKitchen()
     {
         throw  new NotImplementedException();

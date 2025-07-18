@@ -12,6 +12,11 @@ public class MongoDBProductRepository : IProductRepository
     {
     }
 
+    public List<Product> SearchOutOfStockProduct()
+    {
+        throw new NotImplementedException();
+    }
+
     public List<Product> GetAllProducts()
     {
         throw new NotImplementedException();
@@ -51,3 +56,4 @@ public class MongoDBProductRepository : IProductRepository
         throw new NotImplementedException();
     }
 }
+

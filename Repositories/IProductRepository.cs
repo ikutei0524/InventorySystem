@@ -4,6 +4,11 @@ namespace InventorySystem.Repositories;
 
 public interface IProductRepository
 {
+    
+    
+    
+    
+    List<Product> SearchOutOfStockProduct();
     List<Product> GetAllProducts();
     Product GetProductById(int id);
     void AddProduct(Product product);
@@ -22,4 +27,5 @@ public interface IProductRepository
         return 1;
     }
     void UpdateProduct(Product product);
+    
 }
